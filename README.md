@@ -45,6 +45,7 @@ most_similar_document = bm25.get_most_similar(tokenized_query, corpus, top=1)
 - [x] Okapi BM25
 - [ ] pip install
 - [ ] 설명
+- [ ] 병렬 처리
 - [ ] BM25L
 - [ ] BM25+
 - [ ] BM25-Adpt
