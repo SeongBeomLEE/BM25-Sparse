@@ -5,12 +5,12 @@ class BaseTokenizer:
     def preprocessing(self, text:str) -> str:
         raise NotImplementedError()
     
-    def _tokenizer(self, text:str) -> list:
+    def _tokenize(self, text:str) -> list:
         raise NotImplementedError()
 
-    def tokenizer(self, text:str) -> list:
+    def tokenize(self, text:str) -> list:
         text = self.preprocessing(text)
-        return self._tokenizer(text)
+        return self._tokenize(text)
 
 class Tokenizer(BaseTokenizer):
     """
@@ -19,5 +19,5 @@ class Tokenizer(BaseTokenizer):
     def preprocessing(self, text:str):
         text = text.lower()
         return text
-    def _tokenizer(self, text: str):
+    def _tokenize(self, text: str):
         return text.split()

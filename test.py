@@ -8,11 +8,11 @@ corpus = [
 ]
 
 tokenizer = Tokenizer()
-tokenized_corpus = [tokenizer.tokenizer(doc) for doc in corpus]
+tokenized_corpus = [tokenizer.tokenize(doc) for doc in corpus]
 bm25 = BM25OkapiSparse(tokenized_corpus)
 
 query = "windy London"
-tokenized_query = tokenizer.tokenizer(query)
+tokenized_query = tokenizer.tokenize(query)
 scores = bm25.get_scores(tokenized_query)
 print(scores)
 most_similar_document = bm25.get_most_similar(tokenized_query, corpus, top=1)
