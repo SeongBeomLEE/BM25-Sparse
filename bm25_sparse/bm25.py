@@ -55,7 +55,7 @@ class BaseBM25:
     
     def get_scores(self, tokens:list) -> np.array:
         if not all(isinstance(token, str) for token in tokens): raise Exception('String이 아닌 token이 포함되어 있습니다.')
-        tokens = [self.token_to_id[token] for token in tokens]
+        tokens = [self.token_to_id[token] for token in tokens if token in self.token_to_id]
         scores = np.squeeze(np.array(self.scores[:, tokens].sum(axis = 1)))
         return scores
 
