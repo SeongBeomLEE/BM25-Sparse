@@ -1,6 +1,6 @@
 # BM25-Sparse
-- 기존의 [rank_bm25](https://github.com/dorianbrown/rank_bm25) 대용량 corpus에 대하여 Out of Memory 문제가 발생해, 이를 해결하고자 numpy로 구현된 기존의 rank_bm25를 scipy 형태로 구현했습니다.
-- 추가적으로 rank_bm25와 달리 전체 corpus에 대하여 score를 미리 계산하여, most similar document의 탐색 속도를 개선했습니다.
+- numpy로 구현된 [rank_bm25](https://github.com/dorianbrown/rank_bm25)가 대용량 corpus에 대하여 Out of Memory 문제가 발생해, 이를 해결하고자 scipy 형태로 구현했습니다.
+- rank_bm25와 달리 전체 corpus에 대하여 score를 미리 계산하여, most similar document의 탐색 속도를 개선했습니다.
 
 ## Installation
 
