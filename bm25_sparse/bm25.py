@@ -3,17 +3,19 @@ import numpy as np
 import scipy.sparse as sp
 
 class BaseBM25:
-    def __init__(self, corpus:list[list[str]]):
+    def __init__(self, corpus:list[list[str]], verbose=False):
         if not all(isinstance(tokens, list) for tokens in corpus): raise Exception('토큰화된 Corpus가 아닙니다.')
         if not all(isinstance(token, str) for tokens in corpus for token in tokens): raise Exception('String이 아닌 token이 포함되어 있습니다.')
         self.corpus_size = len(corpus)
+        self.verbose = verbose
         self._initialize(corpus)
 
     def _initialize(self, corpus:list[list[str]]):
         """
         TF, token_to_id 생성
         """
-        print("initialize Start")
+        if self.verbose:
+            print("initialize Start")
         id = 0
         doc_len = []
         doc_freqs = []
@@ -34,13 +36,15 @@ class BaseBM25:
         self.doc_freqs = doc_freqs
         self.avgdl = sum(doc_len) / len(corpus)
         self.doc_len = doc_len
-        print("initialize End")
+        if self.verbose:
+            print("initialize End")
 
     def _calc_TF(self) -> sp.csr_matrix:
         """
         TF 계산
         """
-        print("TF Calc Start")
+        if self.verbose:
+            print("TF Calc Start")
         rows, cols, values = [], [], []
         row = 0
         for doc_freq in self.doc_freqs:
@@ -50,7 +54,8 @@ class BaseBM25:
                 values.append(doc_freq[token])
             row += 1
         TF = sp.csr_matrix((np.array(values), (np.array(rows), np.array(cols))), shape=(self.corpus_size, len(self.token_to_id)), dtype=np.float32)
-        print("TF Calc End")
+        if self.verbose:
+            print("TF Calc End")
         return TF
     
     def get_scores(self, tokens:list) -> np.array:
@@ -76,8 +81,8 @@ class BM25OkapiSparse(BaseBM25):
     BM25Okapi의 Sparse Matrix 버전
     https://github.com/dorianbrown/rank_bm25/blob/master/rank_bm25.py
     """
-    def __init__(self, corpus:list[list[str]], k1:float = 1.5, b:float = 0.75, epsilon:float = 0.25):
-        super().__init__(corpus)
+    def __init__(self, corpus:list[list[str]], k1:float = 1.5, b:float = 0.75, epsilon:float = 0.25, verbose=False):
+        super().__init__(corpus, verbose)
         self.k1 = k1
         self.b = b
         self.epsilon = epsilon
@@ -87,7 +92,8 @@ class BM25OkapiSparse(BaseBM25):
         """
         Scores 계산
         """
-        print("Scores Calc Start")
+        if self.verbose:
+            print("Scores Calc Start")
         IDF = self._calc_IDF(TF)
         scores = TF.dot(sp.spdiags(np.array([self.k1 + 1] * len(IDF)), 0, len(IDF), len(IDF)))
         IDF = sp.spdiags(np.array(IDF), 0, len(IDF), len(IDF))
@@ -97,11 +103,13 @@ class BM25OkapiSparse(BaseBM25):
         cols = scores.tocoo().col
         scores = np.squeeze(np.array(scores[scores.nonzero()] / TF[scores.nonzero()]))
         scores = sp.csr_matrix((scores, (rows, cols)), shape=(self.corpus_size, len(self.token_to_id)), dtype=np.float32).tocsc()
-        print("Scores Calc End")
+        if self.verbose:
+            print("Scores Calc End")
         return scores
 
     def _calc_new_TF(self, TF:sp.csr_matrix) -> sp.csr_matrix:
-        print("New TF Calc Start")
+        if self.verbose:
+            print("New TF Calc Start")
         doc_len = self.k1 * (1 - self.b + self.b * np.array(self.doc_len) / self.avgdl)
         rows = TF.tocoo().row
         cols = TF.tocoo().col
@@ -110,14 +118,16 @@ class BM25OkapiSparse(BaseBM25):
         for row, col, data in zip(rows, cols, values):
             new_TF.append(doc_len[row] + data)
         TF = sp.csr_matrix((np.array(new_TF), (rows, cols)), shape=(self.corpus_size, len(self.token_to_id)), dtype=np.float32)
-        print("New TF Calc End")
+        if self.verbose:
+            print("New TF Calc End")
         return TF
 
     def _calc_IDF(self, TF:sp.csr_matrix) -> list:
         """
         IDF 계산
         """
-        print("IDF Calc Start")
+        if self.verbose:
+            print("IDF Calc Start")
         IDF = []
         negative_IDF_token_id_list = []
         frequencies = np.squeeze(np.array((TF >= 1).sum(0)))
@@ -130,5 +140,6 @@ class BM25OkapiSparse(BaseBM25):
         eps = self.epsilon * self.average_idf
         for token_id in negative_IDF_token_id_list:
             IDF[token_id] = eps
-        print("IDF Calc End")
+        if self.verbose:
+            print("IDF Calc End")
         return IDF
